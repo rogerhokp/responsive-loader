@@ -85,7 +85,8 @@ module.exports = function loader(content: Buffer) {
   }
 
   const sizes = parsedResourceQuery.size || parsedResourceQuery.sizes || generatedSizes || config.size || config.sizes || [Number.MAX_SAFE_INTEGER];
-
+  const fileBaseName = path.basename(loaderContext.resourcePath, path.extname(loaderContext.resourcePath));
+  
   if (!sizes) {
     return loaderCallback(null, content);
   }
@@ -100,7 +101,7 @@ module.exports = function loader(content: Buffer) {
       .replace(/\[height\]/ig, '100');
     loaderContext.emitFile(f, content);
     const p = '__webpack_public_path__ + ' + JSON.stringify(f);
-    return loaderCallback(null, 'module.exports = {srcSet:' + p + ',images:[{path:' + p + ',width:100,height:100}],src: ' + p + ',toString:function(){return ' + p + '}};');
+    return loaderCallback(null, 'module.exports = {name: "' + fileBaseName + '",srcSet:' + p + ',images:[{path:' + p + ',width:100,height:100}],src: ' + p + ',toString:function(){return ' + p + '}};');
   }
 
   const createFile = ({data, width, height}) => {
@@ -173,6 +174,7 @@ module.exports = function loader(content: Buffer) {
       const firstImage = files[0];
 
       loaderCallback(null, 'module.exports = {' +
+          'name: "' + fileBaseName + '", ' +
           'srcSet:' + srcset + ',' +
           'images:[' + images + '],' +
           'src:' + firstImage.path + ',' +
